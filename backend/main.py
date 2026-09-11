@@ -40,12 +40,11 @@ async def search_groceries(q: str):
 
     print(f"Searching for: {q}")
     
-    # Run both scrapers concurrently with a timeout constraint enforced in the scraper logic
+    # Run scrapers sequentially. Running Playwright contexts concurrently via asyncio.gather 
+    # on some Windows machines can crash the underlying Node.js pipe and abruptly kill the server.
     try:
-        blinkit_results, instamart_results = await asyncio.gather(
-            scraper.scrape_blinkit(q),
-            scraper.scrape_instamart(q)
-        )
+        blinkit_results = await scraper.scrape_blinkit(q)
+        instamart_results = await scraper.scrape_instamart(q)
     except Exception as e:
         print(f"Scraping error: {e}")
         raise HTTPException(status_code=500, detail="Error fetching data from providers")
@@ -65,5 +64,4 @@ async def search_groceries(q: str):
 if __name__ == "__main__":
     import uvicorn
     # Prevent Uvicorn reload loop switching which crashes Playwright on Windows
-    # Changed port to avoid conflict if 8000 is already in use
-    uvicorn.run(app, host="0.0.0.0", port=8002, reload=False)
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=False)

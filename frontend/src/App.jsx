@@ -38,7 +38,7 @@ function App() {
     setStats(null);
 
     try {
-      const response = await fetch(`http://localhost:8002/api/search?q=${encodeURIComponent(q)}`);
+      const response = await fetch(`http://localhost:8000/api/search?q=${encodeURIComponent(q)}`);
       if (!response.ok) throw new Error('Failed to fetch data from comparison engine.');
       const data = await response.json();
       setResults(data.results || []);
